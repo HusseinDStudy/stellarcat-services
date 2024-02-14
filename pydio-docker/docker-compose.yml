@@ -1,0 +1,40 @@
+version: '3' # Spécifie la version de la syntaxe Docker Compose utilisée.
+
+services: # Définit les services (conteneurs) à déployer.
+
+  cells: # Définition du service "cells", probablement pour Pydio Cells, une solution de partage de fichiers.
+    image: pydio/cells:latest # Utilise la dernière version de l'image Docker Pydio Cells.
+    environment: # Définit les variables d'environnement pour le conteneur.
+      - CELLS_BIND=0.0.0.0:8080 # Lie le service sur tous les interfaces réseau au port 8080.
+      - CELLS_EXTERNAL=http://localhost:8080 # URL externe pour accéder à Cells, à adapter selon le domaine.
+      - CELLS_NO_SSL=1 # Désactive le chiffrement SSL, utilisez http.
+    volumes: # Montage de volumes pour la persistance des données et des logs.
+      - cells-data:/var/cells/data # Pour les données.
+      - cells-logs:/var/cells/logs # Pour les logs.
+    ports: # Ports exposés sur l'hôte.
+      - "8080:8080" # Le port 8080 du conteneur est exposé sur le port 8080 de l'hôte.
+    networks: # Réseau Docker auquel le service est attaché.
+      - server-net # Utilise le réseau personnalisé "server-net".
+    restart: unless-stopped # Politique de redémarrage automatique du conteneur.
+
+  mysql: # Définition du service MySQL pour la base de données.
+    image: mysql:latest # Utilise la dernière version de l'image Docker MySQL.
+    environment: # Variables d'environnement pour la configuration de MySQL.
+      MYSQL_ROOT_PASSWORD: P@ssw0rd # Mot de passe root pour MySQL.
+      MYSQL_DATABASE: pydio # Nom de la base de données à créer.
+      MYSQL_USER: pydio # Utilisateur de la base de données.
+      MYSQL_PASSWORD: P@ssw0rd # Mot de passe pour l'utilisateur de la base de données.
+    volumes: # Montage de volumes pour la persistance des données de MySQL.
+      - mysql-data:/var/lib/mysql
+    networks:
+      - server-net # Attaché au même réseau "server-net".
+    restart: unless-stopped
+
+networks: # Définition des réseaux personnalisés.
+  server-net: # Nom du réseau.
+    driver: bridge # Utilise le pilote de réseau bridge.
+
+volumes: # Définition des volumes pour la persistance des données.
+  cells-data:
+  cells-logs:
+  mysql-data:

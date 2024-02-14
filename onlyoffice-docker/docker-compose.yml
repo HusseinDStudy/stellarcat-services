@@ -1,0 +1,25 @@
+version: '3' # Spécifie la version de la syntaxe Docker Compose utilisée.
+
+services: # Définit les services (conteneurs) à déployer.
+  onlyoffice: # Service OnlyOffice pour l'édition de documents.
+    image: onlyoffice/documentserver:latest # Utilise la dernière version de l'image Docker OnlyOffice.
+    environment: # Variables d'environnement pour configurer OnlyOffice.
+      - JWT_ENABLED=true # Active l'authentification JWT.
+      - JWT_SECRET=your_jwt_secret # Secret JWT pour sécuriser la communication, à personnaliser.
+      - JWT_HEADER=Authorization # Nom de l'entête HTTP pour le token JWT.
+    volumes: # Montage de volumes pour la persistance des données et des logs d'OnlyOffice.
+      - onlyoffice-data:/var/www/onlyoffice/Data
+      - onlyoffice-logs:/var/log/onlyoffice
+    ports:
+      - "8081:80" # Expose le port 80 du conteneur sur le port 8081 de l'hôte.
+    networks:
+      - server-net # Attaché au réseau "server-net".
+    restart: unless-stopped
+
+networks: # Définition des réseaux personnalisés.
+  server-net: # Nom du réseau.
+    driver: bridge # Utilise le pilote de réseau bridge.
+
+volumes: # Définition des volumes pour la persistance des données.
+  onlyoffice-data:
+  onlyoffice-logs:
