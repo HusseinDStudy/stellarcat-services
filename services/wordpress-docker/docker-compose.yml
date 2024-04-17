@@ -1,0 +1,50 @@
+version: '3.8' # Spécifie la version de la syntaxe Docker Compose utilisée.
+
+services: # Définit les services (conteneurs) à déployer.
+  stellarcat-wordpress-db: # Définition du service "stellarcat-wordpress-db", pour MySQL, une base de données relationnelle.
+    container_name: stellarcat-wordpress-db # Definit le nom du conteneur "stellarcat-wordpress-db".
+    hostname: stellarcat-wordpress-db  # Definit le nom d'hôte  du conteneur "stellarcat-wordpress-db".
+    image: mysql:5.7.40 # Utilise la vernière 5.7.40 de l'image Docker MySQL.
+    volumes:
+      - db_data:/var/lib/mysql # Montage de volume pour la persistance des données.
+      # - ./wordpress/db:/var/lib/mysql # Alternative pour la persistance des données.
+    restart: always # Politique de redémarrage  automatique du conteneur.
+    environment: # Définit les variables d'environnement pour le conteneur.
+      MYSQL_ROOT_PASSWORD: wordpress # Mot de passe root pour MySQL.
+      MYSQL_DATABASE: wordpress # Nom de la base de données à création.
+      MYSQL_USER: wordpress # Utilisateur de la base de données.
+      MYSQL_PASSWORD: wordpress # Mot de passe pour l'utilisateur de la base de données.
+    networks: # Réseau Docker auquel le service est attaché.
+      - wordpress-net # Attaché au réseau wordpress-net.
+
+  stellarcat-wordpress: # Définition du service "stellarcat-wordpress", pour WordPress.
+    container_name: stellarcat-wordpress # Definit le nom du conteneur "stellarcat-wordpress".
+    depends_on: # Dépendance du conteneur wordpress à la base de données.
+      - stellarcat-wordpress-db
+    image: wordpress:6.4.3-php8.2-apache # Utilise la version 6.4.3 de l'image Docker WordPress.
+    restart: always # Politique de redémarrage  automatique du conteneur.
+    # volumes:
+    #   - ./wordpress/uploads.ini:/usr/local/etc/php/conf.d/uploads.ini # Volume pour la Configuration de l'upload des fichiers en PHP
+    #   - ./wordpress/html:/var/www/html # Volume pour le deploiement du site sur le serveur Apache
+    environment: # Définit les variables d'environnement pour le conteneur.
+      WORDPRESS_DB_HOST: stellarcat-wordpress-db # Nom du conteneur de la base de données.
+      WORDPRESS_DB_USER: wordpress # Utilisateur de la base de données.
+      WORDPRESS_DB_PASSWORD: wordpress # Mot de passe pour l'utilisateur de la base de données.
+      WORDPRESS_DB_NAME: wordpress # Nom de la base de données à création.
+    labels: # Lables pour la configuration du Traefik
+      - "traefik.enable=true" # Activer le Traefik
+      - "traefik.http.routers.stellarcat-wordpress.entrypoints=web" # L'entrée web
+      - "traefik.http.routers.stellarcat-wordpress.rule=Host(`172.1.0.19`)" # La politique 172.1.0.19
+      - "traefik.http.services.stellarcat-wordpress.loadbalancer.server.port=80" # Le port
+      - "traefik.docker.network=proxy-main" # Le reseau
+    networks: # Réseau Docker auquel le service est attaché.
+      - proxy-main # Attaché au réseau proxy-main.
+      - wordpress-net # Attaché au réseau wordpress-net.
+
+networks: # Définition des réseaux personnalisés.
+  proxy-main: # Nom du réseau.
+    external: true # Le réseau est accessible depuis l'hôte externe.
+  wordpress-net: # Nom du réseau.
+
+volumes: # Définition des volumes pour la persistance des données.
+  db_data:
