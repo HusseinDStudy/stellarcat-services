@@ -1,4 +1,4 @@
-version: '3' # Spécifie la version de la syntaxe Docker Compose utilisée.
+version: '3.8' # Spécifie la version de la syntaxe Docker Compose utilisée.
 
 services: # Définit les services (conteneurs) à déployer.
   onlyoffice: # Service OnlyOffice pour l'édition de documents.
@@ -10,15 +10,25 @@ services: # Définit les services (conteneurs) à déployer.
     volumes: # Montage de volumes pour la persistance des données et des logs d'OnlyOffice.
       - onlyoffice-data:/var/www/onlyoffice/Data
       - onlyoffice-logs:/var/log/onlyoffice
-    ports:
-      - "8081:80" # Expose le port 80 du conteneur sur le port 8081 de l'hôte.
+    #ports:
+    #  - "8081:80" # Expose le port 80 du conteneur sur le port 8081 de l'hôte.
     networks:
-      - server-net # Attaché au réseau "server-net".
+      - onlyoffice-net # Attaché au réseau "onlyoffice-net".
+      - proxy-main # Attaché au réseau "proxy-main".
     restart: unless-stopped
 
+    labels:
+      - "traefik.enable=true" # Activer le Traefik
+      - "traefik.http.routers.onlyoffice.entrypoints=web" # L'entrée web
+      - "traefik.http.routers.onlyoffice.rule=Host(`onlyoffice.${BASE_DOMAIN_NAME}`)" # La regle d'access
+      - "traefik.http.services.onlyoffice.loadbalancer.server.port=80"
+      - "traefik.docker.network=proxy-main" # Le reseau
+
 networks: # Définition des réseaux personnalisés.
-  server-net: # Nom du réseau.
+  onlyoffice-net: # Nom du réseau.
     driver: bridge # Utilise le pilote de réseau bridge.
+  proxy-main:
+    external: true
 
 volumes: # Définition des volumes pour la persistance des données.
   onlyoffice-data:

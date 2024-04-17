@@ -1,4 +1,4 @@
-version: '3.9'
+version: '3.8'
 ## under this tag, we will define our main services object
 services:
   reverse-proxy:
