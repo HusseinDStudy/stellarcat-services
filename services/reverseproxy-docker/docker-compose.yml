@@ -27,7 +27,7 @@ services:
     - --api
     ports:
     - 80:80 ## listening to 80
-    # - 443:443 ## listening to 443
+    - 443:443 ## listening to 443
     # - target: "8090"
     #  host_ip: 127.0.0.1
     #  published: "8091"
@@ -45,13 +45,15 @@ services:
       #traefik.frontend.headers.STSSeconds: 315360000
       traefik.frontend.headers.browserXSSFilter: true
       traefik.frontend.headers.contentTypeNosniff: true
-      #traefik.frontend.headers.forceSTSHeader: true
-      #traefik.frontend.headers.SSLHost: "eristich.dev"
-      #traefik.frontend.headers.STSIncludeSubdomains: true
-      #traefik.frontend.headers.STSPreload: true
+      
+      traefik.frontend.headers.forceSTSHeader: true
+      traefik.frontend.headers.SSLHost: "${BASE_DOMAIN_NAME}"
+      traefik.frontend.headers.STSIncludeSubdomains: true
+      traefik.frontend.headers.STSPreload: true
+      
       traefik.frontend.whiteList.useXForwardedFor: true
-      # traefik.frontend.headers.frameDeny: true
-      # traefik.frontend.headers.customFrameOptionsValue: SAMEORIGIN
+      traefik.frontend.headers.frameDeny: true
+      traefik.frontend.headers.customFrameOptionsValue: SAMEORIGIN
 
       ##### Will review any request coming to any hostname directing to our home server, like http://homeserver.local
       traefik.http.routers.http_catchall.rule: hostregexp(`{host:.+}`)

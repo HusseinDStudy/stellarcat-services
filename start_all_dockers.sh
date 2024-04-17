@@ -2,7 +2,7 @@
 
 # Define the base directory containing the service directories
 BASE_DIR="./services"
-export BASE_DOMAIN_NAME="hussein-study.duckdns.org"  # Ensure this is exported properly
+export BASE_DOMAIN_NAME="husseindajani.tech"  # Ensure this is exported properly
 
 # Add domain to /etc/hosts if it's not already there
 #if ! grep -q "$BASE_DOMAIN_NAME" /etc/hosts; then
