@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  stellarcat-wiki-db:
+    image: postgres:13
+    container_name: stellarcat-wiki-db
+    restart: always
+    environment:
+      POSTGRES_DB: wikijs
+      POSTGRES_USER: wikijs
+      POSTGRES_PASSWORD: wikijs
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - wiki-net
+
+  stellarcat-wiki:
+    image: requarks/wiki:2
+    container_name: stellarcat-wiki
+    restart: always
+    ports:
+      - "8080:3000"
+    environment:
+      DB_TYPE: postgres
+      DB_HOST: stellarcat-wiki-db
+      DB_PORT: 5432
+      DB_USER: wikijs
+      DB_PASS: wikijs
+      DB_NAME: wikijs
+    depends_on:
+      - db
+    labels: # Lables pour la configuration du Traefik
+      - "traefik.enable=true" # Activer le Traefik
+      - "traefik.http.routers.stellarcat-wiki.entrypoints=web" # L'entrée web
+      - "traefik.http.routers.stellarcat-wiki.rule=Host(`wiki.${BASE_DOMAIN_NAME}`)" # La regle d'access
+      - "traefik.http.services.stellarcat-wiki.loadbalancer.server.port=80" # Le port
+      - "traefik.docker.network=proxy-main" # Le reseau
+    networks: # Réseau Docker auquel le service est attaché.
+      - proxy-main # Attaché au réseau proxy-main.
+      - wiki-net
+
+volumes:
+  postgres-data:
+
+networks: # Définition des réseaux personnalisés.
+  proxy-main: # Nom du réseau.
+    external: true # Le réseau est accessible depuis l'hôte externe.
+  wiki-net: # Nom du réseau.
