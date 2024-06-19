@@ -25,3 +25,15 @@ Le repo contient également un script à sa racine permettant de lancer tout les
 ```sh
 $ ./start-all-dockers.sh
 ```
+
+Dans les fichiers **docker-compose.yml** vous pouvez remplacer les variables d'environnements brut par les votre
+dans le cadre de la production dans cette section :
+```yml
+environment:
+      MYSQL_DATABASE: ${STELLARCAT_MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${STELLARCAT_MYSQL_ROOT_PASSWORD}
+```
+Les variable d'environnement seront celles que vous aurait renseigné lors de l'éxécution de la commande :
+```sh
+$ STELLARCAT_MYSQL_ROOT_PASSWORD=root STELLARCAT_MYSQL_DATABASE=test ./start-all-dockers.sh
+```
